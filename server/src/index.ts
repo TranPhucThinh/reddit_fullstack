@@ -1,14 +1,20 @@
 require('dotenv').config()
+import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core'
 import { ApolloServer } from 'apollo-server-express'
+import MongoStore from 'connect-mongo'
 import express from 'express'
+import session from 'express-session'
+import mongoose from 'mongoose'
 import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { DataSource } from 'typeorm'
 
+import { COOKIE_NAME, __prod__ } from './constants'
 import { Post } from './entities/Post'
 import { User } from './entities/User'
 import { HelloResolver } from './resolvers/hello'
 import { UserResolver } from './resolvers/user'
+import { Context } from './types/Context'
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -28,8 +34,37 @@ async function startServer() {
     validate: false,
   })
 
+  // Session/Cookie store
+  const mongoUrl = `mongodb+srv://${process.env.SESSION_DB_USERNAME_DEV_PROD}:${process.env.SESSION_DB_PASSWORD_DEV_PROD}@cluster0.zuzasdc.mongodb.net/?retryWrites=true&w=majority`
+  await mongoose.connect(mongoUrl)
+
+  console.log('MongoDB connected')
+
+  //Session connection
+  app.use(
+    session({
+      name: COOKIE_NAME,
+      store: MongoStore.create({ mongoUrl }),
+      cookie: {
+        maxAge: 1000 * 60 * 60, // 1 hour
+        httpOnly: true, // js fe cannot access cookie
+        secure: __prod__, // cookie only work at https
+        sameSite: 'lax', // protection against CSRF
+      },
+      secret: process.env.SESSION_SECRET_DEV_PROD as string,
+      saveUninitialized: false,
+      resave: false,
+    })
+  )
+
   const apolloServer = new ApolloServer({
     schema,
+    context: ({ req, res }): Context => ({ req, res }),
+    plugins: [
+      ApolloServerPluginLandingPageGraphQLPlayground({
+        // options
+      }),
+    ],
   })
 
   await apolloServer.start()
