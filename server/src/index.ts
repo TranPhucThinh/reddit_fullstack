@@ -15,6 +15,7 @@ import { User } from './entities/User'
 import { HelloResolver } from './resolvers/hello'
 import { UserResolver } from './resolvers/user'
 import { Context } from './types/Context'
+import { PostResolver } from './resolvers/post'
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -30,7 +31,7 @@ const app = express()
 
 async function startServer() {
   const schema = await buildSchema({
-    resolvers: [HelloResolver, UserResolver],
+    resolvers: [HelloResolver, UserResolver, PostResolver],
     validate: false,
   })
 

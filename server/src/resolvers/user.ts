@@ -17,6 +17,7 @@ export class UserResolver {
     @Ctx() { req }: Context
   ): Promise<UserMutationResponse> {
     const validateRegisterInputErrors = validateRegisterInput(registerInput)
+
     if (validateRegisterInputErrors !== null) {
       return {
         code: 400,
@@ -50,13 +51,13 @@ export class UserResolver {
 
       const hashedPassword = await argon2.hash(password)
 
-      let newUser = User.create({
+      const newUser = User.create({
         username,
         password: hashedPassword,
         email,
       })
 
-      newUser = await User.save(newUser)
+      await User.save(newUser)
 
       req.session.userId = newUser.id
 
