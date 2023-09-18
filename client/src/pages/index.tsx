@@ -1,5 +1,10 @@
-import Register from './register'
+import Navbar from '@/components/Navbar'
 
-const Index = () => <h1>Hello</h1>
+const Index = () => (
+  <>
+    <Navbar />
+    <h1>Hello</h1>
+  </>
+)
 
 export default Index

@@ -55,7 +55,7 @@ async function startServer() {
       name: COOKIE_NAME,
       store: MongoStore.create({ mongoUrl }),
       cookie: {
-        maxAge: 1000 * 60 * 1, // 1 hour
+        maxAge: 1000 * 60 * 60, // 1 hour
         httpOnly: true, // js fe cannot access cookie
         secure: __prod__, // cookie only work at https
         sameSite: 'lax', // protection against CSRF
